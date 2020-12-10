@@ -58,7 +58,7 @@ def parse_codes_to_list(area_code_df):
 # format_jpn_phone takes in a dataframe with a primary key column and any number of additional phone number columns
 # you may also pass df_check = 'home_fail', 'mobile_fail', or 'business_fail' to print a dataframe of phone numbers
 # that failed the format process
-def format_jpn_phone(jpn_phone_df, area_code_list_path, gen_csv=False):
+def format_jpn_phn(jpn_phn_df, area_code_list_path, gen_csv=False):
     # area code lists load in
     with open(area_code_list_path, 'rb') as f:
         two_digit_code, three_digit_code, four_digit_code, five_digit_code, six_digit_code, outlier_check = pickle.load(
@@ -101,7 +101,7 @@ def format_jpn_phone(jpn_phone_df, area_code_list_path, gen_csv=False):
                             r'1})-?\d{4}|0[789]0-?\d{4}-?\d{4}|050-?\d{4}-?\d{4})$'
 
     # loop through each column in the dataframe, reformat the Japanese phone numbers, and add them to new columns
-    for column in jpn_phone_df:
+    for column in jpn_phn_df:
 
         # person ID is what we'll batch upload on, do not alter
         if column == 'Person ID':
@@ -109,71 +109,71 @@ def format_jpn_phone(jpn_phone_df, area_code_list_path, gen_csv=False):
 
         else:
             # strip whitespace from left and right of phone numbers
-            jpn_phone_df[column] = jpn_phone_df[column].str.strip()
+            jpn_phn_df[column] = jpn_phn_df[column].str.strip()
 
             # create formatted phone number columns and fill them with NaN
             # we will add the formatted numbers to these columns
             formatted_col_name = f'Formatted {column}'
-            jpn_phone_df[formatted_col_name] = np.nan
+            jpn_phn_df[formatted_col_name] = np.nan
 
             # move Japanese no-country-code numbers to formatted column
             # removing dashes and spaces, leaving only bare numbers
-            jpn_phone_df.loc[(jpn_phone_df[column].str.fullmatch(no_cc_jpn, na=False)), formatted_col_name] = \
-                jpn_phone_df[column].str.replace('-| ', '')
+            jpn_phn_df.loc[(jpn_phn_df[column].str.fullmatch(no_cc_jpn, na=False)), formatted_col_name] = \
+                jpn_phn_df[column].str.replace('-| ', '')
 
             # move all the +81 numbers to formatted column
             # removing dashes, spaces, and iterations of +81, leaving only bare numbers
-            jpn_phone_df.loc[(jpn_phone_df[column].str.fullmatch(cc_jpn, na=False)), formatted_col_name] = \
-                jpn_phone_df[column].str.replace('-| |^(\+?\s*\(?\+?81\)?\s*-?)', '')
+            jpn_phn_df.loc[(jpn_phn_df[column].str.fullmatch(cc_jpn, na=False)), formatted_col_name] = \
+                jpn_phn_df[column].str.replace('-| |^(\+?\s*\(?\+?81\)?\s*-?)', '')
 
             # now that we have clean, undashed, unspaced numbers,
             # lstrip any leading zeros, and add the leading 0 back to all numbers
             # adding the leading zero in allows us to match more accurately to the scraped area codes
-            jpn_phone_df.loc[
-                (jpn_phone_df[formatted_col_name].str.fullmatch(no_cc_nozro_jpn, na=False)), formatted_col_name] = \
-                '0' + (jpn_phone_df[formatted_col_name]).str.lstrip('0')
+            jpn_phn_df.loc[
+                (jpn_phn_df[formatted_col_name].str.fullmatch(no_cc_nozro_jpn, na=False)), formatted_col_name] = \
+                '0' + (jpn_phn_df[formatted_col_name]).str.lstrip('0')
 
             # Fullmatch and Add Hypen to all cell phones (numbers that start with 070/080/090/050)
-            jpn_phone_df.loc[
-                (jpn_phone_df[formatted_col_name].str.fullmatch(cell_no_cc_w_zro_jpn, na=False)), formatted_col_name] = \
-                jpn_phone_df[formatted_col_name].str[:-8] + '-' + jpn_phone_df[formatted_col_name].str[-8:-4] + '-' + \
-                jpn_phone_df[formatted_col_name].str[-4:]
+            jpn_phn_df.loc[
+                (jpn_phn_df[formatted_col_name].str.fullmatch(cell_no_cc_w_zro_jpn, na=False)), formatted_col_name] = \
+                jpn_phn_df[formatted_col_name].str[:-8] + '-' + jpn_phn_df[formatted_col_name].str[-8:-4] + '-' + \
+                jpn_phn_df[formatted_col_name].str[-4:]
 
             # Waterfall from longest area codes (4 digits incl leading zero) to shortest (2 digit incl leading zero).
             # no_cc_jpn_w_zro looks for unhyphenated phone numbers,
             # will not pick up completed numbers w/overlapping codes
-            jpn_phone_df.loc[(jpn_phone_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro, na=False)) & (
-                jpn_phone_df[formatted_col_name].str[0:4].isin(four_digit_code)), formatted_col_name] = \
-                jpn_phone_df[formatted_col_name].str[:-6] + '-' + jpn_phone_df[formatted_col_name].str[-6:-4] + '-' + \
-                jpn_phone_df[formatted_col_name].str[-4:]
+            jpn_phn_df.loc[(jpn_phn_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro, na=False)) & (
+                jpn_phn_df[formatted_col_name].str[0:4].isin(four_digit_code)), formatted_col_name] = \
+                jpn_phn_df[formatted_col_name].str[:-6] + '-' + jpn_phn_df[formatted_col_name].str[-6:-4] + '-' + \
+                jpn_phn_df[formatted_col_name].str[-4:]
 
-            jpn_phone_df.loc[(jpn_phone_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro, na=False)) & (
-                jpn_phone_df[formatted_col_name].str[0:3].isin(three_digit_code)), formatted_col_name] = \
-                jpn_phone_df[formatted_col_name].str[:-7] + '-' + jpn_phone_df[formatted_col_name].str[-7:-4] + '-' + \
-                jpn_phone_df[formatted_col_name].str[-4:]
+            jpn_phn_df.loc[(jpn_phn_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro, na=False)) & (
+                jpn_phn_df[formatted_col_name].str[0:3].isin(three_digit_code)), formatted_col_name] = \
+                jpn_phn_df[formatted_col_name].str[:-7] + '-' + jpn_phn_df[formatted_col_name].str[-7:-4] + '-' + \
+                jpn_phn_df[formatted_col_name].str[-4:]
 
-            jpn_phone_df.loc[(jpn_phone_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro, na=False)) & (
-                jpn_phone_df[formatted_col_name].str[0:2].isin(two_digit_code)), formatted_col_name] = \
-                jpn_phone_df[formatted_col_name].str[:-8] + '-' + jpn_phone_df[formatted_col_name].str[-8:-4] + '-' + \
-                jpn_phone_df[formatted_col_name].str[-4:]
+            jpn_phn_df.loc[(jpn_phn_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro, na=False)) & (
+                jpn_phn_df[formatted_col_name].str[0:2].isin(two_digit_code)), formatted_col_name] = \
+                jpn_phn_df[formatted_col_name].str[:-8] + '-' + jpn_phn_df[formatted_col_name].str[-8:-4] + '-' + \
+                jpn_phn_df[formatted_col_name].str[-4:]
 
             # IMPERATIVE, this line copies any original values that are not formatted, to the new formatted phone columns
             # VC will delete numbers if the value is blank, this is just one safety measure to prevent that
-            jpn_phone_df.loc[
-                (jpn_phone_df[column].notnull()) & (jpn_phone_df[formatted_col_name].isnull()), formatted_col_name] = \
-                jpn_phone_df[column]
+            jpn_phn_df.loc[
+                (jpn_phn_df[column].notnull()) & (jpn_phn_df[formatted_col_name].isnull()), formatted_col_name] = \
+                jpn_phn_df[column]
 
             # lstrip the leading zero once more and add in the country code
             # Does so on japan-validated numbers as various validations at multiple steps increases accuracy
-            jpn_phone_df.loc[
-                (jpn_phone_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro_w_dsh, na=False)), formatted_col_name] = \
-                '+81 ' + jpn_phone_df[formatted_col_name].str.lstrip('0')
+            jpn_phn_df.loc[
+                (jpn_phn_df[formatted_col_name].str.fullmatch(no_cc_jpn_w_zro_w_dsh, na=False)), formatted_col_name] = \
+                '+81 ' + jpn_phn_df[formatted_col_name].str.lstrip('0')
 
     if gen_csv:
-        jpn_phone_df.to_csv('./data/jpn_phn_formatted.csv', index=False)
+        jpn_phn_df.to_csv('./data/jpn_phn_formatted.csv', index=False)
         print('jpn_phn_formatted.csv generated in ./data')
 
     else:
         pass
 
-    return jpn_phone_df
+    return jpn_phn_df

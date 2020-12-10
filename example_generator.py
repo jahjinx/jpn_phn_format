@@ -31,7 +31,7 @@ def bad_jpn_phn(total, area_code_pkl='./data/area_code_lists.pkl', gen_csv=False
     # Dump all generated numbers to a list
     jpn_phn_list = []
 
-    for i in range(total):
+    for i in range(total + 1):
         # collate grouped lists above so that no larger set of values are outweighed by a smaller set of values
         rand_prefix = random.choice([country_code, country_codeless])
         rand_area_mobile_code = random.choice([area_codes, area_codes_zeroless, mobile_codes_zeroless, mobile_codes])
@@ -50,7 +50,7 @@ def bad_jpn_phn(total, area_code_pkl='./data/area_code_lists.pkl', gen_csv=False
         jpn_phn_list.append(random_phone)
 
     if gen_csv:
-        person_ids = random.sample(range(1, total + 1), total)
+        person_ids = random.sample(range(1, total + 2), total + 1)
         phone_dict = {'Home Phone': bad_jpn_phn(total), 'Business Phone': bad_jpn_phn(total)}
 
         if insert_null:
