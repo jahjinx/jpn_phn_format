@@ -41,16 +41,24 @@ test_jpn_phn_df = pd.read_csv('./data/test_phones.csv')
 test_jpn_phn_df.reset_index(inplace=True, drop=True)
 
 area_codes = './data/area_code_lists.pkl'
+
+# run function
+format_jpn_phn(test_jpn_phn_df, area_codes, gen_csv=True)
 ```
 
 ### example_generator.py
 As I cannot make the data I wrote this for public, I wrote a function that generates random, example Japanese phone number and Person ID data. As the goal is to fix inconsistently-formatted phone numbers, example_generator.py generates a couple different types of poor and inconsistently-formatted numbers. It is not as quite as creative as the original dataset (non-Japanese numbers included, typos, other creative formatting), but illustrates the purpose of this repo.
+
 **bad_jpn_phn(total, area_code_pkl='./data/area_code_lists.pkl', gen_csv=False, insert_null=False)** takes three parameters:
+
 *total - The total number of phone numbers you would like to generate.*
+
 
 *area_code_pkl -  A relative path to a pickled area codes file.*
 
+
 *gen_csv=False - Defaults to False. If set to True, will export a CSV containing a "Person ID" column, with IDs, as well as two test phone columns, 'Home Phone', 'Business Phone'.*
+
 
 *insert_null - Defaults to False. If set to True, will randomly replace 20% of the generated phone numbers with Null values.*
 
@@ -60,11 +68,6 @@ from example_generator import bad_jpn_phn
 # Step 2: Generate a test CSV as an example
 bad_jpn_phn(10000, gen_csv=True, insert_null=True)
 ```
-
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
