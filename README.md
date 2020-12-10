@@ -49,7 +49,7 @@ format_jpn_phn(test_jpn_phn_df, area_codes, gen_csv=True)
 ### example_generator.py
 As I cannot make the data I wrote this for public, I wrote a function that generates random, example Japanese phone number and Person ID data. As the goal is to fix inconsistently-formatted phone numbers, example_generator.py generates a couple different types of poor and inconsistently-formatted numbers. It is not as quite as creative as the original dataset (non-Japanese numbers included, typos, other creative formatting), but illustrates the purpose of this repo.
 
-**bad_jpn_phn(total, area_code_pkl='./data/area_code_lists.pkl', gen_csv=False, insert_null=False)** takes three parameters:
+**bad_jpn_phn(total, area_code_pkl='./data/area_code_lists.pkl', gen_csv=False, insert_null=False)** takes three parameters and returns a data frame with the original 'Person ID' column, the original phone column, as well as a formatted phone column for each original phone column:
 
 *total - The total number of phone numbers you would like to generate.*
 
