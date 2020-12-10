@@ -23,11 +23,15 @@ area_codes_list = parse_codes_to_list(area_code_df)
 ```
 
 **format_jpn_phone(jpn_phone_df, area_code_list_path, gen_csv=False)** takes three parameters:
+
 *jpn_phn_df - A data frame with a 'Person ID' column and any number of additional phone number columns.*
+
 
 *area_code_list_path -  A relative path to a pickled area codes file.*
 
+
 *gen_csv=False - Defaults to False. If set to True, will export a CSV containing the original jpn_phn_df with a formatted phone number column added for each respective column.*
+
 
 ```python
 from jpn_phn_format import format_jpn_phone
